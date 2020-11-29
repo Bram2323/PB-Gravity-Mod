@@ -1,5 +1,8 @@
 # Changelog:
 
+1.2.1
+- Optimisation (Changed most of the static vars to normal vars)
+
 1.2.0
 - Settings "Rigidbodies Affected" and "Bridge Pieces Affected" now work as intended
 - Added new "LineBetweenStaticPins" gravity type, this will make gravity a line between the static pins of a custom shape. A huge thanks to @BeljihnWahfl for making this gravity type!

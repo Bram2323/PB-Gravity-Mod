@@ -3,8 +3,6 @@ What it does: It manipulates gravity inside the game
 
 Game Version: 1.24+
 
-Mod Version: 1.2.0
-
 Dependencies: PolyTech Framework 0.7.5+
 
 To install: Place this .dll in the ...\Poly Bridge 2\BepInEx\plugins folder

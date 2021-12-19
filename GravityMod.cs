@@ -37,6 +37,7 @@ namespace GravityMod
 
         //Only when usin center point
         public ConfigDefinition CenterPointDef = new ConfigDefinition(pluginName, "Center Point");
+        public ConfigDefinition centerOnMouseDef = new ConfigDefinition(pluginName, "Center on Mouse");
 
         //only when using center shape
         public ConfigDefinition ShapeColorDef = new ConfigDefinition(pluginName, "Custom Shape Color");
@@ -85,6 +86,8 @@ namespace GravityMod
         public ConfigEntry<GravityType> mGravityType;
 
         public ConfigEntry<Vector2> mCenterPoint;
+
+        public ConfigEntry<bool> mCenterOnMouse;
 
         public ConfigEntry<string> mShapeColor;
 
@@ -157,24 +160,27 @@ namespace GravityMod
             if (instance == null) instance = this;
             IsPressed = false;
             
-            Config.Bind(modEnableDef, true, new ConfigDescription("Controls if the mod should be enabled or disabled", null, new ConfigurationManagerAttributes { Order = 2 }));
+            Config.Bind(modEnableDef, true, new ConfigDescription("Controls if the mod should be enabled or disabled", null, new ConfigurationManagerAttributes { Order = 3 }));
             mEnabled = (ConfigEntry<bool>)Config[modEnableDef];
             mEnabled.SettingChanged += onEnableDisable;
 
-            Config.Bind(BodiesAffectedDef, true, new ConfigDescription("Controls if cars/shapes should be affected by the mod", null, new ConfigurationManagerAttributes { Order = 1 }));
+            Config.Bind(BodiesAffectedDef, true, new ConfigDescription("Controls if cars/shapes should be affected by the mod", null, new ConfigurationManagerAttributes { Order = 2 }));
             mBodiesAffected = (ConfigEntry<bool>)Config[BodiesAffectedDef];
 
-            Config.Bind(NodesAffectedDef, true, new ConfigDescription("Controls if bridge pieces should be affected by the mod", null, new ConfigurationManagerAttributes { Order = 0 }));
+            Config.Bind(NodesAffectedDef, true, new ConfigDescription("Controls if bridge pieces should be affected by the mod", null, new ConfigurationManagerAttributes { Order = 1 }));
             mNodesAffected = (ConfigEntry<bool>)Config[NodesAffectedDef];
 
-            Config.Bind(gravityModifierDef, Vector2.up, new ConfigDescription("How strong gravity is", null, new ConfigurationManagerAttributes { Order = -1 }));
+            Config.Bind(gravityModifierDef, Vector2.up, new ConfigDescription("How strong gravity is", null, new ConfigurationManagerAttributes { Order = 0 }));
             mGravityModifier = (ConfigEntry<Vector2>)Config[gravityModifierDef];
 
-            Config.Bind(gravityTypeDef, GravityType.Normal, new ConfigDescription("What type of gravity the game uses", null, new ConfigurationManagerAttributes { Order = -2 }));
+            Config.Bind(gravityTypeDef, GravityType.Normal, new ConfigDescription("What type of gravity the game uses", null, new ConfigurationManagerAttributes { Order = -1 }));
             mGravityType = (ConfigEntry<GravityType>)Config[gravityTypeDef];
 
-            Config.Bind(CenterPointDef, Vector2.zero, new ConfigDescription("Where the gravity center point is", null, new ConfigurationManagerAttributes { Order = -3 }));
+            Config.Bind(CenterPointDef, Vector2.zero, new ConfigDescription("Where the gravity center point is", null, new ConfigurationManagerAttributes { Order = -2 }));
             mCenterPoint = (ConfigEntry<Vector2>)Config[CenterPointDef];
+
+            Config.Bind(centerOnMouseDef, false, new ConfigDescription("Makes the gravity center be at the mouse (Gravity Mode Must be set to \"Center Point\")", null, new ConfigurationManagerAttributes { Order = -3 }));
+            mCenterOnMouse = (ConfigEntry<bool>)Config[centerOnMouseDef];
 
             Config.Bind(ShapeColorDef, "#FFFFFF", new ConfigDescription("Custom shapes with that color get gravity (Leave blank to target every custom shape)", null, new ConfigurationManagerAttributes { Order = -4 }));
             mShapeColor = (ConfigEntry<string>)Config[ShapeColorDef];
@@ -219,6 +225,23 @@ namespace GravityMod
             this.isEnabled = mEnabled.Value;
 
             PolyTechMain.registerMod(this);
+        }
+
+        void Update(){
+            if(mCenterOnMouse.Value && _GravityType == GravityType.CenterPoint && enabled){
+                Camera camToUse;
+                if(CamIndex != 0){
+                    camToUse = CameraControl.instance.cam;
+                }else{
+                    camToUse = Cameras.MainCamera();
+                }
+                //camToUse.transform.RotateAround(PointsOfView.m_Pivot, Vector3.up, camToUse.transform.rotation.y);
+                //camToUse.transform.RotateAround(PointsOfView.m_Pivot, Vector3.right, camToUse.transform.rotation.x);
+                if((camToUse.transform.rotation.y != 0 || camToUse.transform.rotation.x != 0) && Bridge.IsSimulating()){
+                    PointsOfView.SnapTo(PointOfViewType.SIM_CENTER);
+                }
+                CenterPoint = camToUse.ScreenToWorldPoint(Input.mousePosition);
+            }
         }
 
         public void onEnableDisable(object sender, EventArgs e)
@@ -275,7 +298,10 @@ namespace GravityMod
             settings.GravityModifier = mGravityModifier.Value;
             settings.GravityType = _GravityType;
 
-            if (_GravityType == GravityType.CenterPoint) settings.CenterPoint = CenterPoint;
+            if (_GravityType == GravityType.CenterPoint){ 
+                settings.CenterPoint = mCenterPoint.Value;
+                settings.CenterOnMouse = mCenterOnMouse.Value;
+            }
             else if(_GravityType != GravityType.Normal)
             {
                 settings.ShapeColor = mShapeColor.Value;
@@ -305,7 +331,10 @@ namespace GravityMod
             mGravityModifier.Value = settings.GravityModifier;
             mGravityType.Value = settings.GravityType;
 
-            if (settings.GravityType == GravityType.CenterPoint) mCenterPoint.Value = settings.CenterPoint;
+            if (settings.GravityType == GravityType.CenterPoint){
+                mCenterPoint.Value = settings.CenterPoint;
+                mCenterOnMouse.Value = settings.CenterOnMouse;
+            }
             else if (settings.GravityType != GravityType.Normal)
             {
                 mShapeColor.Value = settings.ShapeColor;
@@ -656,6 +685,16 @@ namespace GravityMod
                 instance.ScaledGrav = Mathf.Clamp01(timeElapsed / (__instance.gravityFadeinDuration + 5.877472E-39f)) * instance.GravityModifier;
             }
         }
+        [HarmonyPatch(typeof(CameraRotate), "Update")]
+        private static class patchCameraRotation
+        {
+            private static bool Prefix(){
+                if(((instance.mCenterOnMouse.Value && instance._GravityType == GravityType.CenterPoint) || (instance.FollowCamera && instance.CamIndex != 0)) && instance.enabled){
+                    return false;
+                }
+                return true;
+            }
+        }
     }
 
     [Serializable]
@@ -688,6 +727,8 @@ namespace GravityMod
             Data += "|" + DistanceMultiplier;
 
             Data += "|" + NearestCenter;
+
+            Data += "|" + CenterOnMouse;
 
             return Data;
         }
@@ -722,6 +763,8 @@ namespace GravityMod
                 settings.DistanceMultiplier = float.Parse(DataArray[11]);
 
                 settings.NearestCenter = DataArray[12] == "True";
+
+                settings.CenterOnMouse = DataArray[13] == "True";
             }
             catch (FormatException)
             {
@@ -756,6 +799,8 @@ namespace GravityMod
         public float DistanceMultiplier = 1;
 
         public bool NearestCenter = false;
+
+        public bool CenterOnMouse = false;
     }
 
 

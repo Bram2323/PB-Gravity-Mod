@@ -1,5 +1,8 @@
 # Changelog:
 
+1.2.2
+- Added setting "Center on Mouse": Gravity is centered around where you mouse is when "CenterPoint" is the gravity type (Overrides "Center Point" setting)
+
 1.2.1
 - Optimisation (Changed most of the static vars to normal vars)
 
@@ -13,8 +16,8 @@
 
 1.1.5:
 - Added support for PTF 0.7.4
-- Added setting "Rigidbodies Affected" - This controls if the mod will affect rigidbodies
-- Added setting "Bridge Pieces Affected" - This controls if the mod will affect bridge pieces
+- Added setting "Rigidbodies Affected": This controls if the mod will affect rigidbodies
+- Added setting "Bridge Pieces Affected": This controls if the mod will affect bridge pieces
 
 1.1.4 and lower:
 - untracked

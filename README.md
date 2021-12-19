@@ -25,6 +25,8 @@ To install: Place this .dll in the ...\Poly Bridge 2\BepInEx\plugins folder
 
 - Center Point: Gravity is centered at this point when "CenterPoint" is the gravity type
 
+- Center on Mouse: Gravity is  centered around where you mouse is when "CenterPoint" is the gravity type (Overrides "Center Point" setting)
+
 - Custom Shape Color: Controls wich shapes have gravity when "CenterShape(StaticPins)" is the gravity type (If blank all shapes have gravity)
 
 - Ignore Own Gravity: Custom shapes will ignore there own gravity if they have gravity

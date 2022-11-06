@@ -1,7 +1,7 @@
 # GravityMod
 What it does: It manipulates gravity inside the game
 
-Game Version: 1.24+
+Game Version: 1.50+
 
 Dependencies: PolyTech Framework 0.7.5+
 

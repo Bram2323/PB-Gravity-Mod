@@ -25,7 +25,7 @@ namespace GravityMod
 
         public const string pluginName = "Gravity Mod";
 
-        public const string pluginVerson = "1.2.1";
+        public const string pluginVerson = "1.2.3";
 
         public ConfigDefinition modEnableDef = new ConfigDefinition(pluginName, "Enable/Disable Mod");
 

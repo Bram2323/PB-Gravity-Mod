@@ -1,5 +1,8 @@
 # Changelog:
 
+1.2.3
+- Gravity mod updated to work with 1.50+
+
 1.2.2
 - Added setting "Center on Mouse": Gravity is centered around where you mouse is when "CenterPoint" is the gravity type (Overrides "Center Point" setting)
 

@@ -25,7 +25,7 @@ namespace GravityMod
 
         public const string pluginName = "Gravity Mod";
 
-        public const string pluginVerson = "1.2.3";
+        public const string pluginVerson = "1.2.4";
 
         public ConfigDefinition modEnableDef = new ConfigDefinition(pluginName, "Enable/Disable Mod");
 
@@ -544,7 +544,7 @@ namespace GravityMod
                 BridgeSaveSlotData autoSave = BridgeSaveSlots.GetAutoSave();
                 bool flag = false;
                 Sandbox.Load(themeStubKey, sandboxLayoutData, flag || level.IsTutorial());
-                PointsOfView.OnLayoutLoaded();
+                PointsOfView.OnLayoutLoaded(level.m_Id);
                 if (!flag && Profile.m_AutomatiallyLoadAutoSave && autoSave != null)
                 {
                     Bridge.ClearAndLoadBinary(autoSave.m_Bridge);

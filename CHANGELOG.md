@@ -1,5 +1,8 @@
 # Changelog:
 
+1.2.4
+- Gravity mod updated to work with 1.60+
+
 1.2.3
 - Gravity mod updated to work with 1.50+
 
